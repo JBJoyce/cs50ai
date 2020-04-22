@@ -149,6 +149,7 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
+    # TODO alphabeta pruning
     turn = player(board)
     action_utility = {}
     
