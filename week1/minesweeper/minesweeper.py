@@ -90,6 +90,9 @@ class Sentence():
     A sentence consists of a set of board cells,
     and a count of the number of those cells which are mines.
     """
+    
+    local_mines = set()
+    local_safe = set()
 
     def __init__(self, cells, count):
         self.cells = set(cells)
@@ -105,27 +108,43 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        raise NotImplementedError
+        
+        if len(self.cells) == self.count:
+            for cell in self.cells:
+                self.local_mines.add(cell)
+        
+        return self.local_mines	
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        raise NotImplementedError
+        
+        
+        if self.count == 0:
+            for cell in self.cells:
+                self.local_safe.add(cell)
+                
+        return self.local_safe				
 
     def mark_mine(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        raise NotImplementedError
+        
+        if cell in self.cells:
+            self.cells.remove(cell)
+            self.count -= 1
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        raise NotImplementedError
+        
+        if cell in self.cells:
+            self.cells.remove(cell)
 
 
 class MinesweeperAI():
