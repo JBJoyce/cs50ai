@@ -91,12 +91,12 @@ class Sentence():
     and a count of the number of those cells which are mines.
     """
     
-    local_mines = set()
-    local_safe = set()
 
     def __init__(self, cells, count):
         self.cells = set(cells)
         self.count = count
+        self.local_mines = set()
+        self.local_safe = set()
 
     def __eq__(self, other):
         return self.cells == other.cells and self.count == other.count
