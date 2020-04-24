@@ -1,89 +1,6 @@
 import itertools
 import random
 
-
-class Minesweeper():
-    """
-    Minesweeper game representation
-    """
-
-    def __init__(self, height=8, width=8, mines=8):
-
-        # Set initial width, height, and number of mines
-        self.height = height
-        self.width = width
-        self.mines = set()
-
-        # Initialize an empty field with no mines
-        self.board = []
-        for i in range(self.height):
-            row = []
-            for j in range(self.width):
-                row.append(False)
-            self.board.append(row)
-
-        # Add mines randomly
-        while len(self.mines) != mines:
-            i = random.randrange(height)
-            j = random.randrange(width)
-            if not self.board[i][j]:
-                self.mines.add((i, j))
-                self.board[i][j] = True
-
-        # At first, player has found no mines
-        self.mines_found = set()
-
-    def print(self):
-        """
-        Prints a text-based representation
-        of where mines are located.
-        """
-        for i in range(self.height):
-            print("--" * self.width + "-")
-            for j in range(self.width):
-                if self.board[i][j]:
-                    print("|X", end="")
-                else:
-                    print("| ", end="")
-            print("|")
-        print("--" * self.width + "-")
-
-    def is_mine(self, cell):
-        i, j = cell
-        return self.board[i][j]
-
-    def nearby_mines(self, cell):
-        """
-        Returns the number of mines that are
-        within one row and column of a given cell,
-        not including the cell itself.
-        """
-
-        # Keep count of nearby mines
-        count = 0
-
-        # Loop over all cells within one row and column
-        for i in range(cell[0] - 1, cell[0] + 2):
-            for j in range(cell[1] - 1, cell[1] + 2):
-
-                # Ignore the cell itself
-                if (i, j) == cell:
-                    continue
-
-                # Update count if cell in bounds and is mine
-                if 0 <= i < self.height and 0 <= j < self.width:
-                    if self.board[i][j]:
-                        count += 1
-
-        return count
-
-    def won(self):
-        """
-        Checks if all mines have been flagged.
-        """
-        return self.mines_found == self.mines
-
-
 class Sentence():
     """
     Logical statement about a Minesweeper game
@@ -95,6 +12,7 @@ class Sentence():
     def __init__(self, cells, count):
         self.cells = set(cells)
         self.count = count
+        
         self.local_mines = set()
         self.local_safe = set()
 
@@ -113,7 +31,9 @@ class Sentence():
             for cell in self.cells:
                 self.local_mines.add(cell)
         
-        return self.local_mines	
+            return self.local_mines
+        else:
+             return None 				
 
     def known_safes(self):
         """
@@ -124,8 +44,9 @@ class Sentence():
         if self.count == 0:
             for cell in self.cells:
                 self.local_safe.add(cell)
-                
-        return self.local_safe				
+            return self.local_safe
+        else:
+             return None    				
 
     def mark_mine(self, cell):
         """
@@ -145,8 +66,7 @@ class Sentence():
         
         if cell in self.cells:
             self.cells.remove(cell)
-
-
+            
 class MinesweeperAI():
     """
     Minesweeper game player
@@ -201,7 +121,26 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+        
+        
+
+        self.moves_made.add(cell)
+       
+        self.mark_safe(cell)
+        self.knowledge.append(Sentence(cell, count))
+        
+        for sentence in self.knowledge:
+            if cell in sentence.cells:
+                sentence.cells.remove(cell)
+                mine_cells = sentence.known_mines()
+                safe_cells = sentence.known_safes()
+                if mine_cells is not None:
+                    for	mine_cell in mine_cells:
+                        mark_mine(mine_cell)
+                if safe_cells is not None:
+                    for safe_cell in safe_cells:
+                        mark_safe(safe_cells)        								
+       
 
     def make_safe_move(self):
         """
