@@ -165,8 +165,10 @@ class MinesweeperAI():
         and self.moves_made, but should not modify any of those values.
         """
         
-        random.sample(game.safes - game.moves_made, 1)
-        
+        try:
+            return random.sample(self.safes - self.moves_made, 1)[0]
+        except ValueError:
+            return None         
 
     def make_random_move(self):
         """
@@ -175,7 +177,18 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        
+        legal = False
+        while not legal:
+            j = random.sample(range(self.height), 1)
+            k = random.sample(range(self.width), 1)
+            move = tuple((j[0],k[0]))
+            if move not in (self.moves_made | self.mines):
+                legal = True
+                return move
+            elif len(self.moves_made) + len(self.mines) is self.height * self.width:
+                legal = True
+                return None
         
 game = MinesweeperAI(height=3, width=3)
 
@@ -183,4 +196,7 @@ game.knowledge.append(Sentence(((0,0), (0,1), (0,2), (1,0), (1,1), (1,2), (2,0),
 game.add_knowledge(cell = ((0,0)), count = 0)
 
 
-print(random.sample(game.safes - game.moves_made, 1))
+print(game.moves_made)
+print(game.mines)
+
+print(game.make_safe_move())
