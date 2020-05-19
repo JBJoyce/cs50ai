@@ -227,16 +227,14 @@ class MinesweeperAI():
                         self.mark_safe((cell[0] - i, cell[1] - j))   
                    
         for sentence in self.knowledge:
-            if cell in sentence.cells:
-                sentence.cells.remove(cell)
-                mine_cells = sentence.known_mines()
-                safe_cells = sentence.known_safes()
-                if mine_cells is not None:
-                    for	mine_cell in mine_cells:
-                        self.mark_mine(mine_cell)
-                if safe_cells is not None:
-                    for safe_cell in safe_cells:
-                        self.mark_safe(safe_cells)        								
+            mine_cells = sentence.known_mines()
+            safe_cells = sentence.known_safes()
+            if mine_cells is not None:
+                for	mine_cell in mine_cells:
+                    self.mark_mine(mine_cell)
+            if safe_cells is not None:
+                for safe_cell in safe_cells:
+                    self.mark_safe(safe_cell)        								
        
 
     def make_safe_move(self):
