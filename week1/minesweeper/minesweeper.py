@@ -214,17 +214,17 @@ class MinesweeperAI():
         cells = []
         
         if count > 0:
-            for j in list(range(-1,3)):
-                for k in list(range(-1,3)):
-                    if ((0 <= cell[0] - j < self.height) and (0 <= cell[1] - k < self.width)) and (cell[0] - j, cell[1] - k) not in self.moves_made:
-                        cells.append((cell[0] - j, cell[1] - k))
+            for i in list(range(-1,2)):
+                for j in list(range(-1,2)):
+                    if ((0 <= cell[0] - i < self.height) and (0 <= cell[1] - j < self.width)) and (cell[0] - i, cell[1] - j) not in self.moves_made:
+                        cells.append((cell[0] - i, cell[1] - j))
             self.knowledge.append(Sentence(cells, count))
         
         if count == 0:
-            for j in list(range(-1,3)):
-                for k in list(range(-1,3)):
-                    if ((0 <= cell[0] - j < self.height) and (0 <= cell[1] - k < self.width)) and (cell[0] - j, cell[1] - k) not in self.moves_made:
-                        self.mark_safe((cell[0] - j, cell[1] - k))   
+            for i in list(range(-1,2)):
+                for j in list(range(-1,2)):
+                    if ((0 <= cell[0] - i < self.height) and (0 <= cell[1] - j < self.width)) and (cell[0] - i, cell[1] - j) not in self.moves_made:
+                        self.mark_safe((cell[0] - i, cell[1] - j))   
                    
         for sentence in self.knowledge:
             if cell in sentence.cells:
