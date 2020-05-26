@@ -126,6 +126,11 @@ def iterate_pagerank(corpus, damping_factor):
         pr_last[key] = 1/len(corpus)
         pr_next[key] = 0
         diff[key] = 1
+        if len(corpus[key]) == 0:
+            link_list = []
+            for link in corpus.keys():
+                link_list.append(link)
+            corpus[key] = link_list
         
     while max(diff.values()) >= 0.001:
         for query_page in pr_next:
