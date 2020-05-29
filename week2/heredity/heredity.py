@@ -38,7 +38,7 @@ PROBS = {
 
 
 def main():
-    #TODO and in else statements instead of no_* lists
+    #TODO replace no_* lists with else statements
     # Check for proper usage
     if len(sys.argv) != 2:
         sys.exit("Usage: python heredity.py data.csv")
