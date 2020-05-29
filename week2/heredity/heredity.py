@@ -59,7 +59,7 @@ def main():
         }
         for person in people
     }
-
+    
     # Loop over all sets of people who might have the trait
     names = set(people)
     for have_trait in powerset(names):
@@ -139,8 +139,86 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
-
+    
+    no_gene = []
+    no_trait = []
+    no_parents = []
+    prob = []
+    final_prob = 1
+    
+    for person in people:
+        if person not in one_gene and person not in two_genes:
+            no_gene.append(person)
+        if person not in have_trait:
+            no_trait.append(person)
+        if people[person]['mother'] == None and people[person]['father'] == None:
+            no_parents.append(person)
+    
+    
+    for person in people:
+        if person in no_parents:
+            if person in no_gene:
+                gene = 0
+                if person in no_trait:
+                    trait = False
+                elif person in have_trait:
+                    trait = True    
+            elif person in one_gene:
+                gene = 1
+                if person in no_trait:
+                    trait = False
+                elif person in have_trait:
+                    trait = True
+            elif person in two_genes:
+                gene = 2
+                if person in no_trait:
+                    trait = False
+                elif person in have_trait:
+                    trait = True
+            
+            prob.append(PROBS["gene"][gene])
+            prob.append(PROBS["trait"][gene][trait])            
+        
+        else:
+            child_gene_prob = None
+            maternal = {}
+            paternal = {}
+            if people[person]['mother'] in no_gene:
+                maternal = {0:1 - PROBS["mutation"], 1:PROBS["mutation"]}
+            if people[person]['mother'] in one_gene:
+                maternal = {0:0.5, 1:0.5}
+            if people[person]['mother'] in two_genes:
+                maternal = {0:PROBS["mutation"], 1:1 - PROBS["mutation"]}
+            if people[person]['father'] in no_gene:
+                paternal = {0:1 - PROBS["mutation"], 1:PROBS["mutation"]}
+            if people[person]['father'] in one_gene:
+                paternal = {0:0.5, 1:0.5}
+            if people[person]['father'] in two_genes:
+                paternal = {0:PROBS["mutation"], 1:1 - PROBS["mutation"]}
+            
+            if person in no_gene:
+                child_gene_prob = (maternal[0] * paternal[0])
+                gene = 0      
+            if person in one_gene:
+               child_gene_prob = (maternal[0] * paternal[1] + maternal[1] * paternal[0])
+               gene = 1
+            if person in two_genes:
+                child_gene_prob = (maternal[1] * paternal[1])
+                gene = 2        
+            
+            if person in no_trait:
+                trait = False
+            if person in have_trait:
+                trait = True
+                    
+            prob.append(child_gene_prob)
+            prob.append(PROBS["trait"][gene][trait])
+            
+    for value in prob:
+        final_prob = final_prob * value
+    print(prob, final_prob)
+    return(final_prob)
+            
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
     """
