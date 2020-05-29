@@ -38,7 +38,7 @@ PROBS = {
 
 
 def main():
-
+    #TODO and in else statements instead of no_* lists
     # Check for proper usage
     if len(sys.argv) != 2:
         sys.exit("Usage: python heredity.py data.csv")
@@ -146,6 +146,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     prob = []
     final_prob = 1
     
+    # Figure out multually exclusive categories for persons based on function arguments
     for person in people:
         if person not in one_gene and person not in two_genes:
             no_gene.append(person)
@@ -154,8 +155,14 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         if people[person]['mother'] == None and people[person]['father'] == None:
             no_parents.append(person)
     
-    
+    # Loop through each person in people and calculate gene and trait probs
+    # vars gene and trait will be used to locate correct prob from PROBS
+    # collect 2 probs from each person (gene, trait) and append to prob list
     for person in people:
+        gene = None
+        trait = None
+        
+        # For persons w/o documented parents use pop. data
         if person in no_parents:
             if person in no_gene:
                 gene = 0
@@ -179,6 +186,9 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             prob.append(PROBS["gene"][gene])
             prob.append(PROBS["trait"][gene][trait])            
         
+        # For persons w/ parents, first determine parents genotype individually
+        # then calculate probability of passing on the required alleles to
+        # their offspring
         else:
             child_gene_prob = None
             maternal = {}
@@ -213,10 +223,12 @@ def joint_probability(people, one_gene, two_genes, have_trait):
                     
             prob.append(child_gene_prob)
             prob.append(PROBS["trait"][gene][trait])
-            
+    
+    
+    #Once all probs are collect calculate joint prob multipling each one        
     for value in prob:
         final_prob = final_prob * value
-    print(prob, final_prob)
+    
     return(final_prob)
             
 
@@ -227,7 +239,45 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    
+    no_gene = []
+    no_trait = []
+    
+    
+    # Figure out multually exclusive categories for persons based on function arguments
+    for person in probabilities:
+        if person not in one_gene and person not in two_genes:
+            no_gene.append(person)
+        if person not in have_trait:
+            no_trait.append(person)
+    
+    # Loop through catergories for each person, assigning num values
+    # numerical vars gene & trait
+    for person in probabilities:
+        gene = None
+        trait = None
+        if person in no_gene:
+            gene = 0
+            if person in no_trait:
+                trait = False
+            elif person in have_trait:
+                trait = True    
+        elif person in one_gene:
+            gene = 1
+            if person in no_trait:
+                trait = False
+            elif person in have_trait:
+                trait = True
+        elif person in two_genes:
+            gene = 2
+            if person in no_trait:
+                trait = False
+            elif person in have_trait:
+                trait = True
+        
+        # Update probabilities dict    
+        probabilities[person]["gene"][gene] += p
+        probabilities[person]["trait"][trait] += p
 
 
 def normalize(probabilities):
@@ -235,7 +285,16 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    
+    # Calulate total prob for all values in gene and trait
+    for person in probabilities:
+        gene_total = probabilities[person]["gene"][0] + probabilities[person]["gene"][1] + probabilities[person]["gene"][2]
+        trait_total = probabilities[person]["trait"][False] + probabilities[person]["trait"][True]
+        
+        for i in [0, 1, 2]:
+            probabilities[person]["gene"][i] = probabilities[person]["gene"][i] / gene_total
+        for j in [False, True]:
+            probabilities[person]["trait"][j] = probabilities[person]["trait"][j] / trait_total     
 
 
 if __name__ == "__main__":
