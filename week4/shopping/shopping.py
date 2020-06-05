@@ -1,5 +1,7 @@
 import csv
 import sys
+import pandas as pd
+from pandas.api.types import CategoricalDtype
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -18,7 +20,6 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(
         evidence, labels, test_size=TEST_SIZE
     )
-
     # Train model and make predictions
     model = train_model(X_train, y_train)
     predictions = model.predict(X_test)
@@ -59,16 +60,52 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
-
+    
+    
+    df = pd.read_csv(filename, dtype=
+    {"Administrative": int, 
+    "Administrative_Duration": float,
+    "Informational": int,
+    "Informational_Duration": float,
+    "ProductRelated": int,
+    "ProductRelated_Duration": float,
+    "BounceRates": float,
+    "ExitRates": float,
+    "PageValues": float,
+    "SpecialDay": float,
+    "Month": CategoricalDtype(categories=
+    ["Jan", "Feb", "Mar",
+    "Apr", "May", "Jun", 
+    "Jul", "Aug", "Sep", 
+    "Oct", "Nov", "Dec"],
+    ordered=True),
+    "OperatingSystems": int,
+    "Browser": int,
+    "Region": int,
+    "TrafficType": int,
+    "VisitorType": CategoricalDtype(categories=
+    ["New_Visitor", "Returning_Visitor"],
+    ordered=True),
+    "Weekend": int,
+    "Revenue": int})
+    
+    cat_columns = df.select_dtypes(['category']).columns
+    df[cat_columns] = df[cat_columns].apply(lambda x:x.cat.codes)
+    
+    
+    evidence = df.iloc[:, 0:17]
+    labels = df.iloc[:, 17]
+    
+    
+    return(evidence, labels)
 
 def train_model(evidence, labels):
-    """
+    """"
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
-
+    neigh = KNeighborsClassifier(n_neighbors=1)
+    return(neigh.fit(X=evidence, y=labels))
 
 def evaluate(labels, predictions):
     """
@@ -85,8 +122,28 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    
+    TP = int(0)
+    FP = int(0)
+    TN = int(0)
+    FN = int(0)
+    
+    for i, truth in enumerate(labels):
+        if truth == predictions[i]:
+            if truth:
+                TP += 1
+            else:
+                TN += 1
+        else:
+            if truth:
+                FN += 1
+            else:
+                FP += 1
 
+    sensitivity = float(TP/(TP + FN))
+    specificity = float(TN/(TN + FP))
+    
+    return(sensitivity, specificity)
 
 if __name__ == "__main__":
     main()
