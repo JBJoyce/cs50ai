@@ -30,6 +30,7 @@ def main():
     print(f"Incorrect: {(y_test != predictions).sum()}")
     print(f"True Positive Rate: {100 * sensitivity:.2f}%")
     print(f"True Negative Rate: {100 * specificity:.2f}%")
+    confusion_matrix(y_test, predictions)
 
 
 def load_data(filename):
@@ -145,5 +146,46 @@ def evaluate(labels, predictions):
     
     return(sensitivity, specificity)
 
+def confusion_matrix(labels, predictions):
+    TP = int(0)
+    FP = int(0)
+    TN = int(0)
+    FN = int(0)
+    
+    for i, truth in enumerate(labels):
+        if truth == predictions[i]:
+            if truth:
+                TP += 1
+            else:
+                TN += 1
+        else:
+            if truth:
+                FN += 1
+            else:
+                FP += 1
+    
+    sensitivity = float(TP/(TP + FN))
+    specificity = float(TN/(TN + FP))
+    PPV = float(TP/(TP + FP))
+    NPV = float(TN/(TN + FN))
+    accuracy = float((TP + TN)/(TP + TN + FP + FN))
+    
+    line0 = f'\n  Confusion Matrix \n'
+    line1 = f'+--------+---------+\n'
+    line2 = f'|        |         |\n'
+    line3 = f'|   {TP}  |   {FP}   | {PPV:.2f}\n'
+    line4 = f'|        |         |\n'
+    line5 = f'|   {FN}  |   {TN}  | {NPV:.2f}\n'
+    line6 = f'    {sensitivity:.2f}     {specificity:.2f}   Acc = {accuracy:.2f}'
+    line7 = f'\n'
+    
+    
+    table = [
+    line0, line1, line2, line3, line4, 
+    line1, line2, line5, line4, line1,
+    line6, line7]
+    
+    for line in table:
+        print(line, end='')
 if __name__ == "__main__":
     main()
