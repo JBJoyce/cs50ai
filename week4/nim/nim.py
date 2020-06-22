@@ -2,6 +2,7 @@ import math
 import random
 import time
 
+# Take a look at the update_q_value method
 
 class Nim():
 
@@ -101,7 +102,14 @@ class NimAI():
         Return the Q-value for the state `state` and the action `action`.
         If no Q-value exists yet in `self.q`, return 0.
         """
-        raise NotImplementedError
+        
+        state = tuple(state)
+        key = (state, action)
+        
+        if key in self.q:
+            return self.q[key]
+        else:
+            return 0
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
         """
@@ -118,7 +126,10 @@ class NimAI():
         `alpha` is the learning rate, and `new value estimate`
         is the sum of the current reward and estimated future rewards.
         """
-        raise NotImplementedError
+        state = tuple(state)
+        key = (state, action)
+        
+        self.q[(key)] = old_q + self.alpha * ((reward + future_rewards) - (old_q))
 
     def best_future_reward(self, state):
         """
@@ -130,8 +141,22 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
-
+        
+        action_list = Nim.available_actions(state)
+        best_value = 0
+        state = tuple(state)
+        
+        if not action_list:
+            return best_value
+        
+        for action in action_list:
+            key = (state, action)
+            if key in self.q and self.q[key] > best_value:
+                best_value = self.q[key]
+        
+        return best_value        
+                
+        
     def choose_action(self, state, epsilon=True):
         """
         Given a state `state`, return an action `(i, j)` to take.
@@ -147,9 +172,35 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
-
-
+        
+        action_list = Nim.available_actions(state)
+        state = tuple(state)
+        best_move = []
+        best_value = 0
+        
+        
+        if not epsilon:
+            for action in action_list:
+                key = (state, action)
+                if self.get_q_value(state, action) > best_value:
+                    best_move = action
+                    best_value = self.get_q_value(state, action)
+            if not best_move:
+                best_move = random.choice(tuple(action_list))
+            
+        else:
+            for action in action_list:
+                key = (state, action)
+                if self.get_q_value(state, action) > best_value:
+                    best_move = action
+                    best_value = self.get_q_value(state, action)
+            if not best_move:
+                best_move = random.choice(tuple(action_list))
+            elif self.epsilon >= random.random():
+                best_move = random.choice(tuple(action_list))
+                
+        return best_move
+    
 def train(n):
     """
     Train an AI by playing `n` games against itself.
