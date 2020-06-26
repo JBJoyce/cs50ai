@@ -58,7 +58,26 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    
+    dim = (IMG_WIDTH, IMG_HEIGHT)
+    images = []
+    labels = []
+    
+    # go through directories one at a time, then go through images
+    # one at a time
+    for dirs in os.listdir(data_dir):
+        for image in os.listdir(os.path.join(data_dir, dirs)):
+            # for each image we need to convert into ndarray, resize and
+            # normalize
+            img = cv2.imread(os.path.join(data_dir, dirs, image))
+            img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+            img = img/255
+        
+            images.append(img)
+            labels.append(dirs) 
+        
+    return (images, labels) 
+    
 
 
 def get_model():
@@ -67,8 +86,37 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
-
-
+    nodes_0 = 32
+    nodes_1 = 128
+    
+    # Create a convolutional neural network. Note much of this is copied from the CS50ai Course
+    model = tf.keras.Sequential([
+        # Convolutional layer. Learn 32 filters using a 3x3 kernel
+        tf.keras.layers.Conv2D(filters=nodes_0, 
+        kernel_size=(3,3), 
+        activation="relu", 
+        input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+        # Max-pooling layer, using 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        # Flatten units
+        tf.keras.layers.Flatten(),
+ 
+        # Add a hidden layer with dropout
+        tf.keras.layers.Dense(nodes_1, activation="relu"),
+        tf.keras.layers.Dropout(0.5),
+        
+        # Add an output layer with output units for all categories
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+    ])
+    
+    # Train neural network
+    model.compile(
+    optimizer="adam",
+    loss="categorical_crossentropy",
+    metrics=["accuracy"]
+    )
+    
+    return model
 if __name__ == "__main__":
     main()
