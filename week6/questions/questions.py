@@ -5,7 +5,7 @@ import os
 import math
 
 FILE_MATCHES = 5
-SENTENCE_MATCHES = 1
+SENTENCE_MATCHES = 3
 
 
 def main():
@@ -69,15 +69,14 @@ def tokenize(document):
     punctuation or English stopwords.
     """
     
-    document = nltk.word_tokenize(document)
+    return_list = []
+    words = nltk.word_tokenize(document.lower())
     
-    for i, token in enumerate(document):
-        document[i] = token.lower()
-        document[i] = token.translate(str.maketrans('','', string.punctuation))
-        if token in nltk.corpus.stopwords.words("english"):
-            document.remove(token)
-    
-    return document        
+    for token in words:
+        if token not in string.punctuation and token not in nltk.corpus.stopwords.words("english"):
+            return_list.append(token)
+        
+    return return_list        
 
 def compute_idfs(documents):
     """
@@ -142,14 +141,17 @@ def top_sentences(query, sentences, idfs, n):
     
     for sentence in sentences:
         sum_idfs = 0
+        wc = 0
         for word in query:
             idf = 0
             if word in sentences[sentence]:
                 idf = idfs[word]
-            sum_idfs += idf     
-        return_list.append((sentence, sum_idfs))
+                wc += 1
+            sum_idfs += idf
+        qtd = wc / len(sentence)         
+        return_list.append((sentence, sum_idfs, qtd))
     
-    return_list.sort(key=lambda tup: tup[1], reverse=True)
+    return_list.sort(key=lambda tup:(tup[1], tup[2]), reverse=True)
     return_list = [item[0] for item in return_list]
     return return_list[0:n]
           
